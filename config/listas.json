@@ -1,0 +1,6 @@
+{
+  "plataformas": ["PS1","PS2","PS3","PS4","PS5","PSP","Xbox","Xbox 360","Xbox One","Xbox Series","PC","Sega Genesis","Sega Saturn","Sega Dreamcast"],
+  "formatos": ["fisico","digital"],
+  "condiciones": ["nuevo","usado"],
+  "empresas": ["Naughty Dog","Insomniac Games","Sony","Sega","Microsoft"]
+}
