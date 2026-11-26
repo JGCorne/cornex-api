@@ -1,0 +1,80 @@
+### Pruebas de /productos (extension REST Client de VS Code)
+# Levantar antes el servidor con: npm run dev
+# Para el login de admin, usar el email y la clave definidos en tu .env (ADMIN1_EMAIL / ADMIN1_CLAVE)
+
+@baseUrl = http://localhost:3000
+
+### Login de admin -> 200 con token (se usa en el alta)
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin1@cornex.com",
+  "clave": "cambiar_clave_admin1"
+}
+
+### Alta de producto (solo admin) -> 201 (repetirlo da 409: duplicado)
+POST {{baseUrl}}/productos
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "nombre": "The Last of Us",
+  "tipo": "juego",
+  "plataforma": "PS3",
+  "formato": "fisico",
+  "condicion": "usado",
+  "empresa": "Naughty Dog",
+  "precio": 15000,
+  "stock": 3
+}
+
+### Catalogo publico (solo activos) -> 200
+GET {{baseUrl}}/productos
+
+### Catalogo con filtros -> 200
+GET {{baseUrl}}/productos?plataforma=PS3&condicion=usado
+
+### Detalle de un producto -> 200 (404 si no existe o esta inactivo)
+GET {{baseUrl}}/productos/1
+
+
+### ---------- Casos de error ----------
+
+### Alta sin token -> 401
+POST {{baseUrl}}/productos
+Content-Type: application/json
+
+{
+  "nombre": "Halo 3",
+  "tipo": "juego",
+  "plataforma": "Xbox 360",
+  "formato": "fisico",
+  "condicion": "nuevo",
+  "empresa": "Microsoft",
+  "precio": 9000,
+  "stock": 2
+}
+
+### Alta con datos invalidos -> 400 con detalles por campo
+POST {{baseUrl}}/productos
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "nombre": " ",
+  "tipo": "accesorio",
+  "plataforma": "Wii",
+  "formato": "fisico",
+  "condicion": "nuevo",
+  "empresa": "Sony",
+  "precio": 0,
+  "stock": 1.5
+}
+
+### Filtro con valor invalido -> 400
+GET {{baseUrl}}/productos?plataforma=Wii
+
+### Producto inexistente -> 404
+GET {{baseUrl}}/productos/9999

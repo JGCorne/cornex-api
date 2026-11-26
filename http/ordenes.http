@@ -1,0 +1,72 @@
+### Pruebas de /ordenes (extension REST Client de VS Code)
+# Levantar antes el servidor con: npm run dev
+# Requiere un cliente registrado (ver http/auth.http) y productos cargados (ver http/productos.http)
+
+@baseUrl = http://localhost:3000
+
+### Login de cliente -> 200 con token
+# @name loginCliente
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan.perez@mail.com",
+  "clave": "clave1234"
+}
+
+### Crear orden (solo cliente) -> 201 con total, descuento e items
+# Cliente registrado hace 30 dias o menos: 25% de descuento
+POST {{baseUrl}}/ordenes
+Authorization: Bearer {{loginCliente.response.body.token}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "productoId": 1, "cantidad": 1 }
+  ]
+}
+
+### Mis ordenes -> 200
+GET {{baseUrl}}/ordenes/mias
+Authorization: Bearer {{loginCliente.response.body.token}}
+
+
+### ---------- Casos de error ----------
+
+### Stock insuficiente -> 409 (y no se descuenta el stock de ningun item)
+POST {{baseUrl}}/ordenes
+Authorization: Bearer {{loginCliente.response.body.token}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "productoId": 1, "cantidad": 1 },
+    { "productoId": 2, "cantidad": 9999 }
+  ]
+}
+
+### Producto inexistente -> 404
+POST {{baseUrl}}/ordenes
+Authorization: Bearer {{loginCliente.response.body.token}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "productoId": 9999, "cantidad": 1 }
+  ]
+}
+
+### Producto repetido / sin items / cantidad no entera -> 400
+POST {{baseUrl}}/ordenes
+Authorization: Bearer {{loginCliente.response.body.token}}
+Content-Type: application/json
+
+{
+  "items": [
+    { "productoId": 1, "cantidad": 1 },
+    { "productoId": 1, "cantidad": 2 }
+  ]
+}
+
+### Sin token -> 401
+GET {{baseUrl}}/ordenes/mias
