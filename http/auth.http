@@ -1,0 +1,96 @@
+### Pruebas de /auth (extension REST Client de VS Code)
+# Levantar antes el servidor con: npm run dev
+# Para el login de admin, usar el email y la clave definidos en tu .env (ADMIN1_EMAIL / ADMIN1_CLAVE)
+
+@baseUrl = http://localhost:3000
+
+### Registro de un cliente -> 201 (la respuesta no incluye la clave)
+POST {{baseUrl}}/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Juan Perez",
+  "email": "juan.perez@mail.com",
+  "dni": "30123456",
+  "clave": "clave1234"
+}
+
+### Registro enviando rol admin -> 201, pero el usuario queda como cliente
+POST {{baseUrl}}/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Maria Gomez",
+  "email": "maria.gomez@mail.com",
+  "dni": "31123456",
+  "clave": "clave1234",
+  "rol": "admin"
+}
+
+### Login de cliente -> 200 con token (se guarda para las siguientes peticiones)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan.perez@mail.com",
+  "clave": "clave1234"
+}
+
+### Login de admin del seed -> 200 con token
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin1@cornex.com",
+  "clave": "cambiar_clave_admin1"
+}
+
+### Perfil con token -> 200
+GET {{baseUrl}}/auth/perfil
+Authorization: Bearer {{login.response.body.token}}
+
+
+### ---------- Casos de error ----------
+
+### Datos invalidos -> 400 con detalles por campo
+POST {{baseUrl}}/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "",
+  "email": "esto-no-es-un-email",
+  "dni": "123",
+  "clave": "corta"
+}
+
+### Email o DNI repetido -> 409 (ejecutar despues del primer registro)
+POST {{baseUrl}}/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Juan Perez",
+  "email": "juan.perez@mail.com",
+  "dni": "30123456",
+  "clave": "clave1234"
+}
+
+### Credenciales incorrectas -> 401 "Credenciales invalidas"
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan.perez@mail.com",
+  "clave": "clave_equivocada"
+}
+
+### Perfil sin token -> 401
+GET {{baseUrl}}/auth/perfil
+
+### Perfil con token roto -> 401
+GET {{baseUrl}}/auth/perfil
+Authorization: Bearer token.invalido.123
+
+### Ruta inexistente -> 404
+GET {{baseUrl}}/no-existe

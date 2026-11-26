@@ -7,6 +7,11 @@ const RAIZ = path.resolve(__dirname, '..')
 // Carga las variables del archivo .env de la raiz
 dotenv.config({ path: path.join(RAIZ, '.env'), quiet: true })
 
+// Sin secreto no se pueden firmar ni verificar tokens: se corta al arrancar
+if (!process.env.JWT_SECRET) {
+  throw new Error('Falta definir JWT_SECRET en el archivo .env (ver .env.example)')
+}
+
 // Listas de valores permitidos (plataformas, formatos, condiciones, empresas)
 const listas = require('../config/listas.json')
 

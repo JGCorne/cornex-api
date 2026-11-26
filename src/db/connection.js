@@ -37,7 +37,8 @@ Orden.belongsToMany(Producto, { through: ItemOrden, foreignKey: 'ordenId', other
 Producto.belongsToMany(Orden, { through: ItemOrden, foreignKey: 'productoId', otherKey: 'ordenId', onDelete: 'RESTRICT' })
 
 // Relaciones directas con ItemOrden, para acceder a cantidad y precioUnitario de cada renglon
-Orden.hasMany(ItemOrden, { foreignKey: 'ordenId', onDelete: 'RESTRICT' })
+// Los include desde una orden usan as: 'items' (orden.items)
+Orden.hasMany(ItemOrden, { foreignKey: 'ordenId', as: 'items', onDelete: 'RESTRICT' })
 ItemOrden.belongsTo(Orden, { foreignKey: 'ordenId', onDelete: 'RESTRICT' })
 Producto.hasMany(ItemOrden, { foreignKey: 'productoId', onDelete: 'RESTRICT' })
 ItemOrden.belongsTo(Producto, { foreignKey: 'productoId', onDelete: 'RESTRICT' })
